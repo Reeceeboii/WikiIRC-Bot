@@ -2,6 +2,8 @@
 import network.NetUtils;
 import network.ServerManager;
 
+import org.fastily.jwiki.core.MQuery;
+import org.fastily.jwiki.core.NS;
 import org.fastily.jwiki.core.Wiki;
 
 import java.io.File;
@@ -9,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -23,6 +26,7 @@ public class Bot {
         env = loadEnv();
         // create a new wiki instance
         wiki = new Wiki.Builder().build();
+        wiki.login(env.get("WIKIUSERNAME"), env.get("WIKIPASS"));
         // create a server manager instance and connect to the server
         serverManager = new ServerManager(addr, port);
         //serverManager.connect(NICK, channel);
@@ -31,7 +35,8 @@ public class Bot {
 
     private void mainLoop() throws IOException {
         String server_res = null;
-        System.out.println(env);
+        ArrayList<String> articles = wiki.getRandomPages(150, NS.MAIN);
+        articles.forEach(article -> System.out.println("https://en.wikipedia.org/wiki/" + article.replace(' ', '_')));
         while(true){
             while((server_res = serverManager.readline()) != null){
                 System.out.println(server_res);
