@@ -1,8 +1,6 @@
-
 import network.NetUtils;
 import network.ServerManager;
 
-import org.fastily.jwiki.core.MQuery;
 import org.fastily.jwiki.core.NS;
 import org.fastily.jwiki.core.Wiki;
 
@@ -19,9 +17,20 @@ public class Bot {
     private ServerManager serverManager;
     private HashMap<String, String> env;
     private static final String NICK = "WikiBot";
+    private final String CHANNEL;
+    private static final String WIKI_PREFIX = "https://en.wikipedia.org/wiki/";
     private Wiki wiki;
+    private boolean alive = true;
 
+    /**
+     * Create a new instance of the IRC bot
+     * @param addr The remote address of the IRC server to join
+     * @param port The port that the IRC server is running on
+     * @param channel The channel to join (with or without the '#')
+     * @throws IOException Any errors that occur during the process of joining the server
+     */
     Bot(InetAddress addr, int port, String channel) throws IOException {
+        CHANNEL = channel;
         // load environment variables
         env = loadEnv();
         // create a new wiki instance
@@ -29,17 +38,20 @@ public class Bot {
         wiki.login(env.get("WIKIUSERNAME"), env.get("WIKIPASS"));
         // create a server manager instance and connect to the server
         serverManager = new ServerManager(addr, port);
-        //serverManager.connect(NICK, channel);
+        serverManager.connect(NICK, channel);
         mainLoop();
     }
 
     private void mainLoop() throws IOException {
         String server_res = null;
-        ArrayList<String> articles = wiki.getRandomPages(150, NS.MAIN);
-        articles.forEach(article -> System.out.println("https://en.wikipedia.org/wiki/" + article.replace(' ', '_')));
-        while(true){
+        //ArrayList<String> articles = wiki.getRandomPages(5, NS.MAIN);
+        //articles.forEach(article -> System.out.println(WIKI_PREFIX + article.replace(' ', '_')));
+        while(alive){
             while((server_res = serverManager.readline()) != null){
-                System.out.println(server_res);
+                System.out.println("\t" + server_res);
+                if(server_res.toLowerCase().startsWith("ping")){
+                    serverManager.pong(server_res.substring(5));
+                }
             }
         }
     }
@@ -50,7 +62,7 @@ public class Bot {
      * @throws FileNotFoundException If there is no '.env' file to load
      */
     private HashMap<String, String> loadEnv() throws FileNotFoundException {
-        HashMap<String, String> envMap = new HashMap<String, String>();
+        HashMap<String, String> envMap = new HashMap<>();
         final File envFile = new File(".env");
         Scanner reader = new Scanner(envFile);
         while(reader.hasNextLine()){

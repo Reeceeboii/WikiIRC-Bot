@@ -38,7 +38,27 @@ public class ServerManager {
         writer.flush();
     }
 
+    /**
+     * Reads a line from the reader linked to the socket
+     * @return A new line read from the socket's BufferedReader
+     * @throws IOException Any errors reading the line
+     */
     public String readline() throws IOException {
         return reader.readLine();
     }
+
+    /**
+     * Send a pong back to server in response to a ping message
+     * @param server The name of the server to send a ping to
+     * @throws IOException Any errors writing to the server
+     */
+    public void pong(String server) throws IOException {
+        writer.write("PONG " + server + END_MSG);
+        writer.flush();
+    }
+
+    public BufferedWriter getWriter(){
+        return writer;
+    }
+
 }
