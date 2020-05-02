@@ -53,6 +53,7 @@ public class ServerManager {
      * @throws IOException Any errors writing to the server
      */
     public void pong(String server) throws IOException {
+        System.out.println("Bot received a ping");
         writer.write("PONG " + server + END_MSG);
         writer.flush();
     }

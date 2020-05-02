@@ -1,7 +1,6 @@
 import network.NetUtils;
 import network.ServerManager;
 
-import org.fastily.jwiki.core.NS;
 import org.fastily.jwiki.core.Wiki;
 
 import java.io.File;
@@ -9,7 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -17,6 +16,7 @@ public class Bot {
     private ServerManager serverManager;
     private HashMap<String, String> env;
     private static final String NICK = "WikiBot";
+    private static final String ALIAS = "wb";
     private final String CHANNEL;
     private static final String WIKI_PREFIX = "https://en.wikipedia.org/wiki/";
     private Wiki wiki;
@@ -51,6 +51,16 @@ public class Bot {
                 System.out.println("\t" + server_res);
                 if(server_res.toLowerCase().startsWith("ping")){
                     serverManager.pong(server_res.substring(5));
+                }
+                if (server_res.toLowerCase().contains("wb")) {
+                    try {
+                        final String[] parsed = server_res.substring(server_res.indexOf(ALIAS) + ALIAS.length() + 1).split(" ");
+                        System.out.println("Parsed args: " + Arrays.toString(parsed));
+                    } catch (StringIndexOutOfBoundsException e){
+                        System.err.println("I was mentioned, but no args were given");
+                        break;
+                    }
+
                 }
             }
         }
