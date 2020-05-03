@@ -1,6 +1,7 @@
 import network.NetUtils;
 import network.ServerManager;
 
+// library to allow easy interfacing with MediaWiki APIs without fiddling with the network stuff myself
 import org.fastily.jwiki.core.Wiki;
 
 import java.io.File;
@@ -8,15 +9,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.*;
 
 public class Bot {
     private ServerManager serverManager;
     private HashMap<String, String> env;
     private static final String NICK = "WikiBot";
-    private static final String ALIAS = "wb";
+    private static final String ALIAS = "!wb";
     private final String CHANNEL;
     private static final String WIKI_PREFIX = "https://en.wikipedia.org/wiki/";
     private Wiki wiki;
@@ -49,21 +48,38 @@ public class Bot {
         while(alive){
             while((server_res = serverManager.readline()) != null){
                 System.out.println("\t" + server_res);
+
+                // look out for PINGs from the server
                 if(server_res.toLowerCase().startsWith("ping")){
                     serverManager.pong(server_res.substring(5));
                 }
-                if (server_res.toLowerCase().contains("wb")) {
-                    try {
-                        final String[] parsed = server_res.substring(server_res.indexOf(ALIAS) + ALIAS.length() + 1).split(" ");
-                        System.out.println("Parsed args: " + Arrays.toString(parsed));
-                    } catch (StringIndexOutOfBoundsException e){
-                        System.err.println("I was mentioned, but no args were given");
-                        break;
-                    }
 
+                // if the bot is being spoken to
+                if (server_res.toLowerCase().contains(ALIAS)) {
+                    // load message into list and remove empty args
+                    ArrayList<String> cmd = new ArrayList<>(Arrays.asList(server_res.substring(server_res.indexOf(CHANNEL) + CHANNEL.length() + 2).split(" ")));
+                    cmd.removeIf(token -> token.length() == 0);
+                    System.out.println("Parsed args: " + cmd);
+
+                    if(cmd.size() == 1){
+                        writeHelp();
+                    }
                 }
             }
         }
+    }
+
+    /**
+     * Output the bot's help message
+     * @throws IOException An error occurring during the socket write
+     */
+    private void writeHelp() throws IOException {
+        serverManager.writeToChannel("------------------- WikiBot help -------------------", CHANNEL);
+        serverManager.writeToChannel("| Usage...                                         |", CHANNEL);
+        serverManager.writeToChannel("|                                                  |", CHANNEL);
+        serverManager.writeToChannel("| • `!wb -r` random article                        |", CHANNEL);
+        serverManager.writeToChannel("| • `!wb -r <n>` n random articles                 |", CHANNEL);
+        serverManager.writeToChannel("----------------------------------------------------", CHANNEL);
     }
 
     /**

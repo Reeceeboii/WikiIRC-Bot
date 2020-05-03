@@ -53,11 +53,22 @@ public class ServerManager {
      * @throws IOException Any errors writing to the server
      */
     public void pong(String server) throws IOException {
-        System.out.println("Bot received a ping");
         writer.write("PONG " + server + END_MSG);
+        writer.flush();
+        System.out.println("Bot received a ping and replied");
+    }
+
+    public void writeToChannel(String msg, String channel) throws IOException {
+        String message = "PRIVMSG " + channel + " :" + msg;
+        System.out.println("Sending: " + message);
+        writer.write(message + END_MSG);
         writer.flush();
     }
 
+    /**
+     * Get the socket's writer object
+     * @return The BufferedWriter belonging to the server's socket connection
+     */
     public BufferedWriter getWriter(){
         return writer;
     }
