@@ -16,7 +16,7 @@ import java.util.*;
 public class Bot {
     private ServerManager serverManager;
     private HashMap<String, String> env;
-    private static final String NICK = "WikiBot";
+    private String nick;
     private static final String ALIAS = "!wb";
     private final String CHANNEL;
     private static final String WIKI_PREFIX = "https://en.wikipedia.org/wiki/";
@@ -33,6 +33,7 @@ public class Bot {
      */
     Bot(InetAddress addr, int port, String channel) throws IOException {
         CHANNEL = channel;
+        nick = "WikiBot";
 
         // load environment variables
         env = loadEnv();
@@ -43,7 +44,7 @@ public class Bot {
 
         // create a server manager instance and connect to the server
         serverManager = new ServerManager(addr, port);
-        serverManager.connect(NICK, channel);
+        serverManager.connect(nick, channel);
 
         // create a new ArticleLogger instance so we can log previously created article links
         logger = new ArticleLogger("./res/prev_article_log.txt");
@@ -110,8 +111,18 @@ public class Bot {
                                         serverManager.writeToChannel(article, CHANNEL);
                                         logger.log(article);
                                     }
+                                    break;
                                 } catch (Exception e) {
                                     writeHelp();
+                                    break;
+                                }
+                            }
+
+                            // changing the name of the bot
+                            if (cmd.get(1).equals("-name")){
+                                if(cmd.get(2).length() > 0 && cmd.get(2).length() <= 9){
+                                    serverManager.rename(cmd.get(2));
+                                    break;
                                 }
                             }
                             break;
@@ -134,6 +145,7 @@ public class Bot {
         serverManager.writeToChannel("|                                                  |", CHANNEL);
         serverManager.writeToChannel("| • 1 Random article: !wb -r                       |", CHANNEL);
         serverManager.writeToChannel("| • Get n random articles: !wb -r <n>              |", CHANNEL);
+        serverManager.writeToChannel("| • Rename me: !wb -name <name>                    |", CHANNEL);
         serverManager.writeToChannel("| • Quit WikiBot: !wb -q                           |", CHANNEL);
         serverManager.writeToChannel("----------------------------------------------------", CHANNEL);
     }

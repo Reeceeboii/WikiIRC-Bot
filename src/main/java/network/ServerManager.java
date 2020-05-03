@@ -81,4 +81,14 @@ public class ServerManager {
         writer.write("QUIT :" + msg + END_MSG);
         writer.flush();
     }
+
+    /**
+     * Used to allow the bot to rename itself
+     * @param newNick The new nickname to update to
+     * @throws IOException Any errors that occur when writing to the socket
+     */
+    public void rename(String newNick) throws IOException {
+        writer.write("NICK " + newNick + END_MSG);
+        writer.flush();
+    }
 }
