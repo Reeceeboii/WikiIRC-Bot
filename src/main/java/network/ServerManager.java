@@ -58,6 +58,12 @@ public class ServerManager {
         System.out.println("Bot received a ping and replied");
     }
 
+    /**
+     * Write a message to a channel
+     * @param msg The message to send
+     * @param channel The channel to send it to
+     * @throws IOException Any errors thrown during socket write
+     */
     public void writeToChannel(String msg, String channel) throws IOException {
         String message = "PRIVMSG " + channel + " :" + msg;
         System.out.println("Sending: " + message);
@@ -66,11 +72,13 @@ public class ServerManager {
     }
 
     /**
-     * Get the socket's writer object
-     * @return The BufferedWriter belonging to the server's socket connection
+     * Make the bot quit the server
+     * @param msg The exit message to display
+     * @throws IOException Any errors thrown during socket write
      */
-    public BufferedWriter getWriter(){
-        return writer;
+    public void quit(String msg) throws IOException {
+        // quit server and close socket
+        writer.write("QUIT :" + msg + END_MSG);
+        writer.flush();
     }
-
 }

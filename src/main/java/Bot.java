@@ -1,7 +1,9 @@
+import logging.ArticleLogger;
 import network.NetUtils;
 import network.ServerManager;
 
 // library to allow easy interfacing with MediaWiki APIs without fiddling with the network stuff myself
+import org.fastily.jwiki.core.NS;
 import org.fastily.jwiki.core.Wiki;
 
 import java.io.File;
@@ -18,6 +20,7 @@ public class Bot {
     private static final String ALIAS = "!wb";
     private final String CHANNEL;
     private static final String WIKI_PREFIX = "https://en.wikipedia.org/wiki/";
+    ArticleLogger logger;
     private Wiki wiki;
     private boolean alive = true;
 
@@ -30,17 +33,29 @@ public class Bot {
      */
     Bot(InetAddress addr, int port, String channel) throws IOException {
         CHANNEL = channel;
+
         // load environment variables
         env = loadEnv();
+
         // create a new wiki instance
         wiki = new Wiki.Builder().build();
         wiki.login(env.get("WIKIUSERNAME"), env.get("WIKIPASS"));
+
         // create a server manager instance and connect to the server
         serverManager = new ServerManager(addr, port);
         serverManager.connect(NICK, channel);
+
+        // create a new ArticleLogger instance so we can log previously created article links
+        logger = new ArticleLogger("./res/prev_article_log.txt");
+
         mainLoop();
     }
 
+    /*
+        city message: 	:reece!~reece@bastion0.vmware-dc.city.ac.uk PRIVMSG #help :!wb -r
+	                    :BenFrost!~BenFrost@trowbridge.unix1.city.ac.uk PRIVMSG #help :!wb -r 15
+
+     */
     private void mainLoop() throws IOException {
         String server_res = null;
         //ArrayList<String> articles = wiki.getRandomPages(5, NS.MAIN);
@@ -55,14 +70,54 @@ public class Bot {
                 }
 
                 // if the bot is being spoken to
-                if (server_res.toLowerCase().contains(ALIAS)) {
+                if (server_res.toLowerCase().contains(ALIAS) && server_res.toLowerCase().contains("privmsg")) {
                     // load message into list and remove empty args
                     ArrayList<String> cmd = new ArrayList<>(Arrays.asList(server_res.substring(server_res.indexOf(CHANNEL) + CHANNEL.length() + 2).split(" ")));
                     cmd.removeIf(token -> token.length() == 0);
                     System.out.println("Parsed args: " + cmd);
 
-                    if(cmd.size() == 1){
-                        writeHelp();
+                    switch (cmd.size()){
+                        case 2:
+                            // one random Wikipedia article
+                            if(cmd.get(1).equals("-r")){
+                                // generate a random article, log it and send it back to the channel
+                                final String URL = wikiURLEncode(wiki.getRandomPages(1, NS.MAIN).get(0));
+                                logger.log(URL);
+                                serverManager.writeToChannel(URL, CHANNEL);
+                                break;
+                            }
+
+                            // quitting the server
+                            if (cmd.get(1).equals("-q")) {
+                                serverManager.quit("--------------- WikiBot says goodbye! ---------------");
+                                alive = !alive;
+                                break;
+                            }
+                            writeHelp();
+                            break;
+                        case 3:
+                            // n number of random articles (<= 15)
+                            if(cmd.get(1).equals("-r")) {
+                                try {
+                                    final int n = Integer.parseInt(cmd.get(2));
+                                    if (n > 15) {
+                                        serverManager.writeToChannel("No more than 15 articles at once please!", CHANNEL);
+                                        break;
+                                    }
+                                    ArrayList<String> articles = wiki.getRandomPages(n, NS.MAIN);
+                                    for (String article : articles) {
+                                        article = wikiURLEncode(article);
+                                        serverManager.writeToChannel(article, CHANNEL);
+                                        logger.log(article);
+                                    }
+                                } catch (Exception e) {
+                                    writeHelp();
+                                }
+                            }
+                            break;
+                        default:
+                            writeHelp();
+                            break;
                     }
                 }
             }
@@ -77,9 +132,19 @@ public class Bot {
         serverManager.writeToChannel("------------------- WikiBot help -------------------", CHANNEL);
         serverManager.writeToChannel("| Usage...                                         |", CHANNEL);
         serverManager.writeToChannel("|                                                  |", CHANNEL);
-        serverManager.writeToChannel("| • `!wb -r` random article                        |", CHANNEL);
-        serverManager.writeToChannel("| • `!wb -r <n>` n random articles                 |", CHANNEL);
+        serverManager.writeToChannel("| • 1 Random article: !wb -r                       |", CHANNEL);
+        serverManager.writeToChannel("| • Get n random articles: !wb -r <n>              |", CHANNEL);
+        serverManager.writeToChannel("| • Quit WikiBot: !wb -q                           |", CHANNEL);
         serverManager.writeToChannel("----------------------------------------------------", CHANNEL);
+    }
+
+    /**
+     * Replace article name spaces with underscores and then append to Wikipedia domain to create a URL
+     * @param articleName The name of the article to encode into a URL
+     * @return A URL linking to the article name's corresponding Wikipedia page
+     */
+    public static String wikiURLEncode(String articleName){
+        return WIKI_PREFIX.concat(articleName.replace(" ", "_"));
     }
 
     /**
@@ -101,7 +166,7 @@ public class Bot {
 
     public static void main(String[] args) throws IOException {
         if(args.length != 3) {
-            System.err.println("Please provide at least 3 arguments - the IRC server's IP and port and a channel name");
+            System.err.println("Please provide at least 3 arguments - server IP, server port and channel (with or without #)");
             System.err.println("USAGE: Bot <ip> <port> <channel>");
             System.err.println("i.e: Bot 123.123.123.123 6667 #chan");
             System.exit(1);
