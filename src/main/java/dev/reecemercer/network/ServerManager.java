@@ -1,10 +1,13 @@
-package network;
+package dev.reecemercer.network;
 
 import java.io.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+/**
+ * Holds details about and manages interactions with the currently connected IRC server
+ */
 public class ServerManager {
     private static final String END_MSG = "\r\n";
     private Socket IRCSock;
@@ -14,6 +17,12 @@ public class ServerManager {
     private BufferedWriter writer;
     private BufferedReader reader;
 
+    /**
+     * Create a new ServerManager instance
+     * @param serverIP The IP address of the server to connect the bot to
+     * @param port The port of the server to connect the bot to
+     * @throws IOException Errors raised when opening the socket connection (i.e. any timeouts)
+     */
     public ServerManager(InetAddress serverIP, int port) throws IOException {
         this.serverIP = serverIP;
         this.port = port;
@@ -39,7 +48,7 @@ public class ServerManager {
     }
 
     /**
-     * Reads a line from the reader linked to the socket
+     * Reads a line from the BufferedReader linked to the socket
      * @return A new line read from the socket's BufferedReader
      * @throws IOException Any errors reading the line
      */
@@ -55,7 +64,7 @@ public class ServerManager {
     public void pong(String server) throws IOException {
         writer.write("PONG " + server + END_MSG);
         writer.flush();
-        System.out.println("Bot received a ping and replied");
+        System.out.println("dev.reecemercer.Bot received a ping and replied");
     }
 
     /**

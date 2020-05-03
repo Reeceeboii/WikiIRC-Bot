@@ -1,6 +1,8 @@
-import logging.ArticleLogger;
-import network.NetUtils;
-import network.ServerManager;
+package dev.reecemercer;
+
+import dev.reecemercer.logging.ArticleLogger;
+import dev.reecemercer.network.NetUtils;
+import dev.reecemercer.network.ServerManager;
 
 // library to allow easy interfacing with MediaWiki APIs without fiddling with the network stuff myself
 import org.fastily.jwiki.core.NS;
@@ -13,6 +15,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
 
+/**
+ * Main bot driver class
+ */
 public class Bot {
     private ServerManager serverManager;
     private HashMap<String, String> env;
@@ -145,6 +150,7 @@ public class Bot {
         serverManager.writeToChannel("|                                                  |", CHANNEL);
         serverManager.writeToChannel("| • 1 Random article: !wb -r                       |", CHANNEL);
         serverManager.writeToChannel("| • Get n random articles: !wb -r <n>              |", CHANNEL);
+        serverManager.writeToChannel("| • WikiParty: !wb -p [<nick>]                     |", CHANNEL);
         serverManager.writeToChannel("| • Rename me: !wb -name <name>                    |", CHANNEL);
         serverManager.writeToChannel("| • Quit WikiBot: !wb -q                           |", CHANNEL);
         serverManager.writeToChannel("----------------------------------------------------", CHANNEL);
@@ -176,6 +182,11 @@ public class Bot {
         return envMap;
     }
 
+    /**
+     * Main method to kick off the program
+     * @param args Command line arguments that contain server, port and channel information for the bot
+     * @throws IOException Errors thrown when testing for server connections
+     */
     public static void main(String[] args) throws IOException {
         if(args.length != 3) {
             System.err.println("Please provide at least 3 arguments - server IP, server port and channel (with or without #)");

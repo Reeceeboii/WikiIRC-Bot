@@ -1,6 +1,6 @@
-# WikiIRC-Bot
+# WikiIRC-dev.reecemercer.Bot
 ### This was developed as part of a university module: IN2011 Computer Networks
-WikiIRC-Bot is an IRC bot with MediaWiki API integrations.
+WikiIRC-dev.reecemercer.Bot is an IRC bot with MediaWiki API integrations.
 
 ## Usage and commands
 **The bot's trigger string is `!wb`**

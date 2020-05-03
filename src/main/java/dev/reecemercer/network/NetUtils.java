@@ -1,13 +1,17 @@
-package network;
+package dev.reecemercer.network;
 
 import java.io.IOException;
 import java.net.*;
 
+/**
+ * Network utility functions that facilitate the connection to a remote IRC server
+ */
 public class NetUtils {
     /**
      * Given an IP address and a port, check if there is actually anything alive and running there
      * @param addr The IP address of the remote host
      * @param port The port to attempt to open a socket with
+     * @throws IOException Any errors that occur when writing to the socket
      * @return A true or false value denoting if IP:Port is reachable or not
      */
     public static boolean isHostAlive(InetAddress addr, int port) throws IOException {

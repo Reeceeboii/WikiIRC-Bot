@@ -1,4 +1,4 @@
-package logging;
+package dev.reecemercer.logging;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -12,9 +12,9 @@ public class ArticleLogger {
         file = new File(name);
         // create the logging file if it doesn't exist already
         if(file.createNewFile()){
-            System.out.println("Bot created new logging file");
+            System.out.println("dev.reecemercer.Bot created new logging file");
         } else {
-            System.out.println("Bot created new file handle to existing logging file");
+            System.out.println("dev.reecemercer.Bot created new file handle to existing logging file");
         }
 
         // set up readers and writers
