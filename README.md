@@ -34,6 +34,16 @@ example credentials inside. The file is just an `=` delimited set of key/value p
 your Wikipedia credentials are, but `WIKIUSERNAME` and `WIKIPASS` need to be present as keys.
 Remember that the required file's name is `.env`, not `.env.example`.
 
+## Building from source
+**Building from source requires Maven to be installed.**
+1. Clone this repository.
+2. Rename `.env.example` to `.env` and change the values inside it to your Wikipedia credentials.
+3. In the project directory, execute `mvn package`. The `.jar` file will be built in the `./target` directory.
+4. Execute the `.jar` file using aforementioned arguments: `java -jar WikiIRC-Bot-1.0-SNAPSHOT-jar-with-dependencies 127.0.0.1 6667 help`
+
+If you want to run without building manually, opening as a Maven project within any modern Java IDE and running 
+`dev.reecemercer.Bot` with the same argument set will also do the trick.
+
 ## External libraries
 WikiBot makes use of [jwiki](https://github.com/fastily/jwiki) (released under the **GNU General Public License v3.0**) as a wrapper for the WikiMedia API. This is listed in 
 `pom.xml` as a Maven build dependency.
