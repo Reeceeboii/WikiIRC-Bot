@@ -103,12 +103,13 @@ public class ServerManager {
 
     /**
      * Asks the server to move the bot to another channel
-     * @param channel The channel name to move to (with or without prefixed '#'
+     * @param newChannel The channel name to move to
+     * @param oldChannel The channel that the bot is current a member of
      * @throws IOException Any errors thrown when writing to the server
      */
-    public void moveToChannel(String channel) throws IOException {
-        channel = channel.startsWith("#") ? channel : "#".concat(channel); // add '#' if it isn't given
-        writer.write("JOIN " + channel + END_MSG);
+    public void moveToChannel(String newChannel, String oldChannel) throws IOException {
+        writer.write("PART " + oldChannel + END_MSG);
+        writer.write("JOIN " + newChannel + END_MSG);
         writer.flush();
     }
 }

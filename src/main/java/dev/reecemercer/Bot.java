@@ -94,7 +94,7 @@ public class Bot {
                         } else if (cmd.get(1).equals("-q")) { // quitting the server
                             serverManager.quit("WikiBot says goodbye!");
                             System.out.println("Bot is exiting");
-                            // close the logger's file writing handle to make sure everything is writter
+                            // close the logger's file writing handle to make sure everything is writer
                             logger.closeFileHandle();
                             alive = !alive;
                         } else {
@@ -129,7 +129,15 @@ public class Bot {
                         }
                     // 4 or more arguments
                     } else if (cmd.size() >= 4) {
-                        System.out.println("length 4 arg captured");
+                        if(cmd.get(1).equals("-p")) {
+                            final String oldChannel = channel;
+                            // updated local channel copy to the one given in the argument by the user
+                            channel = cmd.get(2).startsWith("#") ? cmd.get(2) : "#".concat(cmd.get(2));
+                            serverManager.writeToChannel("Moving to ".concat(channel).concat("!"), oldChannel);
+                            serverManager.moveToChannel(channel, oldChannel);
+                        } else {
+                            writeHelp();
+                        }
                     } else {
                         writeHelp();
                     }
