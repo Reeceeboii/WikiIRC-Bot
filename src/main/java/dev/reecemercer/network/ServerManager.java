@@ -4,18 +4,15 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.List;
 
 /**
  * Holds details about and manages interactions with the currently connected IRC server
  */
 public class ServerManager {
     private static final String END_MSG = "\r\n";
-    private Socket IRCSock;
-    private final InetAddress serverIP;
-    private InetSocketAddress addr;
-    private final int port;
-    private BufferedWriter writer;
-    private BufferedReader reader;
+    private final BufferedWriter writer;
+    private final BufferedReader reader;
 
     /**
      * Create a new ServerManager instance
@@ -24,10 +21,8 @@ public class ServerManager {
      * @throws IOException Errors raised when opening the socket connection (i.e. any timeouts)
      */
     public ServerManager(InetAddress serverIP, int port) throws IOException {
-        this.serverIP = serverIP;
-        this.port = port;
-        addr = new InetSocketAddress(serverIP, port);
-        IRCSock = new Socket();
+        InetSocketAddress addr = new InetSocketAddress(serverIP, port);
+        Socket IRCSock = new Socket();
         IRCSock.connect(addr);
         writer = new BufferedWriter(new OutputStreamWriter(IRCSock.getOutputStream()));
         reader = new BufferedReader(new InputStreamReader(IRCSock.getInputStream()));
@@ -102,14 +97,35 @@ public class ServerManager {
     }
 
     /**
-     * Asks the server to move the bot to another channel, leaving its current one in the process
+     * Asks the server to move the bot to another channel
      * @param newChannel The channel name to move to
-     * @param oldChannel The channel that the bot is current a member of
-     * @throws IOException Any errors thrown when writing to the server
+     * @throws IOException Any errors thrown when writing the JOIN message to the socket
      */
-    public void moveToChannel(String newChannel, String oldChannel) throws IOException {
-        writer.write("PART " + oldChannel + END_MSG);
+    public void moveToChannel(String newChannel) throws IOException {
         writer.write("JOIN " + newChannel + END_MSG);
+        writer.flush();
+    }
+
+    /**
+     * Makes the bot leave a channel its a member of
+     * @param oldChannel The name of the channel to leave
+     * @throws IOException Any errors thrown when writing the PART message to the socket
+     */
+    public void leaveChannel(String oldChannel) throws IOException {
+        writer.write("PART " + oldChannel + END_MSG);
+        writer.flush();
+    }
+
+    /**
+     * Invite users to a channel
+     * @param nicks A list of nicks to use to send out invite messages
+     * @param channel The channel to invite them to
+     * @throws IOException Any errors thrown when writing the invite messages to the socket
+     */
+    public void invite(List<String> nicks, String channel) throws IOException {
+        for(String nick: nicks){
+            writer.write("INVITE " + nick + " " + channel + END_MSG);
+        }
         writer.flush();
     }
 }

@@ -20,6 +20,8 @@ Type just `!wb` to get help output.
   * example: `!wb -r`
 * `-r <n>` gives `n` number of random Wikipedia articles.
   * example: `!wb -r 5`
+* `-p <channel name> [<nick>]` WikiParty! Move channels and invite others.
+  * example: `!wb -p party reece john james`
 * `-name <name>` renames the bot.
   * example: `!wb -name NewName`
 * `-q` quit. Make the bot exit the server and close.

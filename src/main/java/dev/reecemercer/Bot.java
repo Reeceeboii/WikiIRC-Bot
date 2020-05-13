@@ -134,7 +134,13 @@ public class Bot {
                             // updated local channel copy to the one given in the argument by the user
                             channel = cmd.get(2).startsWith("#") ? cmd.get(2) : "#".concat(cmd.get(2));
                             serverManager.writeToChannel("Moving to ".concat(channel).concat("!"), oldChannel);
-                            serverManager.moveToChannel(channel, oldChannel);
+                            serverManager.moveToChannel(channel);
+                            if(cmd.size() > 4) {
+                                serverManager.invite(cmd.subList(3, cmd.size()), channel);
+                            } else {
+                                List<String> nicks = Collections.singletonList(cmd.get(3));
+                                serverManager.invite(nicks, channel);                            }
+                            serverManager.leaveChannel(oldChannel);
                         } else {
                             writeHelp();
                         }
