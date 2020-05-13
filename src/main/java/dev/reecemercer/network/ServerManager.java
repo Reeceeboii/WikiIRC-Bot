@@ -64,7 +64,7 @@ public class ServerManager {
     public void pong(String server) throws IOException {
         writer.write("PONG " + server + END_MSG);
         writer.flush();
-        System.out.println("dev.reecemercer.Bot received a ping and replied");
+        System.out.println("Bot received a ping and replied");
     }
 
     /**

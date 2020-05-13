@@ -95,7 +95,10 @@ public class Bot {
 
                             // quitting the server
                             if (cmd.get(1).equals("-q")) {
-                                serverManager.quit("--------------- WikiBot says goodbye! ---------------");
+                                serverManager.quit("WikiBot says goodbye!");
+                                System.out.println("Bot is exiting");
+                                // close the logger's file writing handle to make sure everything is writter
+                                logger.closeFileHandle();
                                 alive = !alive;
                                 break;
                             }
@@ -110,6 +113,7 @@ public class Bot {
                                         serverManager.writeToChannel("No more than 15 articles at once please!", CHANNEL);
                                         break;
                                     }
+                                    // generate n random articles, URL encode them, send them, log them. Sorted.
                                     ArrayList<String> articles = wiki.getRandomPages(n, NS.MAIN);
                                     for (String article : articles) {
                                         article = wikiURLEncode(article);
@@ -126,6 +130,7 @@ public class Bot {
                             // changing the name of the bot
                             if (cmd.get(1).equals("-name")){
                                 if(cmd.get(2).length() > 0 && cmd.get(2).length() <= 9){
+                                    serverManager.writeToChannel("Sure! Renaming myself to ".concat(cmd.get(2)), CHANNEL);
                                     serverManager.rename(cmd.get(2));
                                     break;
                                 }
@@ -172,12 +177,23 @@ public class Bot {
      */
     private HashMap<String, String> loadEnv() throws FileNotFoundException {
         HashMap<String, String> envMap = new HashMap<>();
-        final File envFile = new File(".env");
-        Scanner reader = new Scanner(envFile);
-        while(reader.hasNextLine()){
-            String data = reader.nextLine();
-            String[] split = data.split("=");
-            envMap.put(split[0], split[1]);
+        try {
+            final File envFile = new File(".env");
+            Scanner reader = new Scanner(envFile);
+            while (reader.hasNextLine()) {
+                String data = reader.nextLine();
+                String[] split = data.split("=");
+                envMap.put(split[0], split[1]);
+            }
+            // make sure Wikipedia credentials are given in the .env file
+            if(!(envMap.containsKey("WIKIUSERNAME")) || !(envMap.containsKey("WIKIPASS"))){
+                System.err.println(".env file error - Make sure WIKIUSERNAME and WIKIPASS values are provided. See README for details.");
+                System.exit(1);
+            }
+            return envMap;
+        } catch (FileNotFoundException e){
+            System.err.println(".env file needs to be provided");
+            System.exit(1);
         }
         return envMap;
     }
@@ -198,7 +214,7 @@ public class Bot {
                 // create new IP and port combination to test if server is reachable
                 final InetAddress IP = InetAddress.getByName(args[0].toLowerCase().equals("localhost") ? "127.0.0.1" : args[0]);
                 // parse channel arg and add # if needed
-                final String CHANNEL = args[2].charAt(0) == '#' ? args[2] : "#" + args[2];
+                final String CHANNEL = args[2].charAt(0) == '#' ? args[2] : "#".concat(args[2]);
                 final int PORT = Integer.parseInt(args[1]);
 
                 // is there actually a server at IP:PORT?

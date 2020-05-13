@@ -12,9 +12,9 @@ public class ArticleLogger {
         file = new File(name);
         // create the logging file if it doesn't exist already
         if(file.createNewFile()){
-            System.out.println("dev.reecemercer.Bot created new logging file");
+            System.out.println("Bot created new logging file");
         } else {
-            System.out.println("dev.reecemercer.Bot created new file handle to existing logging file");
+            System.out.println("Bot created new file handle to existing logging file");
         }
 
         // set up readers and writers
@@ -31,6 +31,15 @@ public class ArticleLogger {
         System.out.println("Logging a URL into " + file.getName());
         writer.write(url + "\n");
         writer.flush();
+    }
+
+    /**
+     * Flush and close the logging file's attached writer
+     * @throws IOException Any errors thrown during the flushing/closing of the writer
+     */
+    public void closeFileHandle() throws IOException {
+        writer.flush();
+        writer.close();
     }
 
 }
