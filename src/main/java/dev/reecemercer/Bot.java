@@ -23,7 +23,7 @@ public class Bot {
     private HashMap<String, String> env;
     private String nick;
     private static final String ALIAS = "!wb";
-    private final String CHANNEL;
+    private String channel;
     private static final String WIKI_PREFIX = "https://en.wikipedia.org/wiki/";
     ArticleLogger logger;
     private Wiki wiki;
@@ -37,7 +37,7 @@ public class Bot {
      * @throws IOException Any errors that occur during the process of joining the server
      */
     Bot(InetAddress addr, int port, String channel) throws IOException {
-        CHANNEL = channel;
+        this.channel = channel;
         nick = "WikiBot";
 
         // load environment variables
@@ -78,67 +78,60 @@ public class Bot {
                 // if the bot is being spoken to
                 if (server_res.toLowerCase().contains(ALIAS) && server_res.toLowerCase().contains("privmsg")) {
                     // load message into list and remove empty args
-                    ArrayList<String> cmd = new ArrayList<>(Arrays.asList(server_res.substring(server_res.indexOf(CHANNEL) + CHANNEL.length() + 2).split(" ")));
+                    ArrayList<String> cmd = new ArrayList<>(Arrays.asList(server_res.substring(server_res.indexOf(channel) + channel.length() + 2).split(" ")));
                     cmd.removeIf(token -> token.length() == 0);
                     System.out.println("Parsed args: " + cmd);
 
-                    switch (cmd.size()){
-                        case 2:
-                            // one random Wikipedia article
-                            if(cmd.get(1).equals("-r")){
-                                // generate a random article, log it and send it back to the channel
-                                final String URL = wikiURLEncode(wiki.getRandomPages(1, NS.MAIN).get(0));
-                                logger.log(URL);
-                                serverManager.writeToChannel(URL, CHANNEL);
-                                break;
-                            }
-
-                            // quitting the server
-                            if (cmd.get(1).equals("-q")) {
-                                serverManager.quit("WikiBot says goodbye!");
-                                System.out.println("Bot is exiting");
-                                // close the logger's file writing handle to make sure everything is writter
-                                logger.closeFileHandle();
-                                alive = !alive;
-                                break;
-                            }
+                    // process commands based on num of args given in the message to the bot
+                    //      number of arguments includes '!wb' itself. I.e. '!wb -r' counts as two args
+                    // let's start with processing commands that contain 2 arguments
+                    if(cmd.size() == 2){
+                        if(cmd.get(1).equals("-r")){
+                            // generate a random article, log it and send it back to the channel
+                            final String URL = wikiURLEncode(wiki.getRandomPages(1, NS.MAIN).get(0));
+                            logger.log(URL);
+                            serverManager.writeToChannel(URL, channel);
+                        } else if (cmd.get(1).equals("-q")) { // quitting the server
+                            serverManager.quit("WikiBot says goodbye!");
+                            System.out.println("Bot is exiting");
+                            // close the logger's file writing handle to make sure everything is writter
+                            logger.closeFileHandle();
+                            alive = !alive;
+                        } else {
                             writeHelp();
-                            break;
-                        case 3:
-                            // n number of random articles (<= 15)
-                            if(cmd.get(1).equals("-r")) {
-                                try {
-                                    final int n = Integer.parseInt(cmd.get(2));
-                                    if (n > 15) {
-                                        serverManager.writeToChannel("No more than 15 articles at once please!", CHANNEL);
-                                        break;
-                                    }
-                                    // generate n random articles, URL encode them, send them, log them. Sorted.
-                                    ArrayList<String> articles = wiki.getRandomPages(n, NS.MAIN);
-                                    for (String article : articles) {
-                                        article = wikiURLEncode(article);
-                                        serverManager.writeToChannel(article, CHANNEL);
-                                        logger.log(article);
-                                    }
-                                    break;
-                                } catch (Exception e) {
-                                    writeHelp();
-                                    break;
+                        }
+                    // 3 arguments
+                    } else if (cmd.size() == 3){
+                        // n number of random articles (<= 15)
+                        if(cmd.get(1).equals("-r")) {
+                            try {
+                                final int n = Integer.parseInt(cmd.get(2));
+                                if (n > 15) {
+                                    serverManager.writeToChannel("No more than 15 articles at once please!", channel);
                                 }
-                            }
-
-                            // changing the name of the bot
-                            if (cmd.get(1).equals("-name")){
-                                if(cmd.get(2).length() > 0 && cmd.get(2).length() <= 9){
-                                    serverManager.writeToChannel("Sure! Renaming myself to ".concat(cmd.get(2)), CHANNEL);
-                                    serverManager.rename(cmd.get(2));
-                                    break;
+                                // generate n random articles, URL encode them, send them, log them. Sorted.
+                                ArrayList<String> articles = wiki.getRandomPages(n, NS.MAIN);
+                                for (String article : articles) {
+                                    article = wikiURLEncode(article);
+                                    serverManager.writeToChannel(article, channel);
+                                    logger.log(article);
                                 }
+                            } catch (Exception e) {
+                                writeHelp();
                             }
-                            break;
-                        default:
+                        } else if (cmd.get(1).equals("-name")){ // changing the name of the bot
+                            if(cmd.get(2).length() > 0 && cmd.get(2).length() <= 9){
+                                serverManager.writeToChannel("Sure! Renaming myself to ".concat(cmd.get(2)), channel);
+                                serverManager.rename(cmd.get(2));
+                            }
+                        } else {
                             writeHelp();
-                            break;
+                        }
+                    // 4 or more arguments
+                    } else if (cmd.size() >= 4) {
+                        System.out.println("length 4 arg captured");
+                    } else {
+                        writeHelp();
                     }
                 }
             }
@@ -150,15 +143,15 @@ public class Bot {
      * @throws IOException An error occurring during the socket write
      */
     private void writeHelp() throws IOException {
-        serverManager.writeToChannel("------------------- WikiBot help -------------------", CHANNEL);
-        serverManager.writeToChannel("| Usage...                                         |", CHANNEL);
-        serverManager.writeToChannel("|                                                  |", CHANNEL);
-        serverManager.writeToChannel("| • 1 Random article: !wb -r                       |", CHANNEL);
-        serverManager.writeToChannel("| • Get n random articles: !wb -r <n>              |", CHANNEL);
-        serverManager.writeToChannel("| • WikiParty: !wb -p [<nick>]                     |", CHANNEL);
-        serverManager.writeToChannel("| • Rename me: !wb -name <name>                    |", CHANNEL);
-        serverManager.writeToChannel("| • Quit WikiBot: !wb -q                           |", CHANNEL);
-        serverManager.writeToChannel("----------------------------------------------------", CHANNEL);
+        serverManager.writeToChannel("------------------- WikiBot help -------------------", channel);
+        serverManager.writeToChannel("| Usage...                                         |", channel);
+        serverManager.writeToChannel("|                                                  |", channel);
+        serverManager.writeToChannel("| • 1 Random article: !wb -r                       |", channel);
+        serverManager.writeToChannel("| • Get n random articles: !wb -r <n>              |", channel);
+        serverManager.writeToChannel("| • WikiParty: !wb -p <channel name> [<nick>]      |", channel);
+        serverManager.writeToChannel("| • Rename me: !wb -name <name>                    |", channel);
+        serverManager.writeToChannel("| • Quit WikiBot: !wb -q                           |", channel);
+        serverManager.writeToChannel("----------------------------------------------------", channel);
     }
 
     /**

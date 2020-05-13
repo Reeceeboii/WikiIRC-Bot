@@ -1,6 +1,6 @@
-# WikiIRC-dev.reecemercer.Bot
+# WikiIRC-Bot
 ### This was developed as part of a university module: IN2011 Computer Networks
-WikiIRC-dev.reecemercer.Bot is an IRC bot with MediaWiki API integrations.
+WikiIRC-Bot is an IRC bot with MediaWiki API integrations.
 
 ## Running the bot
 The bot takes 3 commands: the address of a remote (or local for testing) host system, the port of the remote host's IRC 
@@ -27,7 +27,7 @@ Type just `!wb` to get help output.
   
 ## Environment variables file
 The bot needs a set of Wikipedia credentials (username and password) in order to function. These need to be 
-provided in the form on a `.env` file in the project's root. An example file, `.env.example`, has been given with some 
+provided in the form of a `.env` file in the project's root. An example file, `.env.example`, has been given with some 
 example credentials inside. The file is just an `=` delimited set of key/value pairs. The values are equal to whatever 
 your Wikipedia credentials are, but `WIKIUSERNAME` and `WIKIPASS` need to be present as keys.
 Remember that the required file's name is `.env`, not `.env.example`.

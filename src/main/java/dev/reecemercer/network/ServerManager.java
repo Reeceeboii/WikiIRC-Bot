@@ -100,4 +100,15 @@ public class ServerManager {
         writer.write("NICK " + newNick + END_MSG);
         writer.flush();
     }
+
+    /**
+     * Asks the server to move the bot to another channel
+     * @param channel The channel name to move to (with or without prefixed '#'
+     * @throws IOException Any errors thrown when writing to the server
+     */
+    public void moveToChannel(String channel) throws IOException {
+        channel = channel.startsWith("#") ? channel : "#".concat(channel); // add '#' if it isn't given
+        writer.write("JOIN " + channel + END_MSG);
+        writer.flush();
+    }
 }
