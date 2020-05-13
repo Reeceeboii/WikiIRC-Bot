@@ -56,15 +56,12 @@ public class Bot {
         mainLoop();
     }
 
-    /*
-        city message: 	:reece!~reece@bastion0.vmware-dc.city.ac.uk PRIVMSG #help :!wb -r
-	                    :BenFrost!~BenFrost@trowbridge.unix1.city.ac.uk PRIVMSG #help :!wb -r 15
-
+    /**
+     * The bot's main loop. Keeps an eye out for incoming messages and takes action on them if they're important.
+     * @throws IOException Any errors thrown when writing or reading from the socket
      */
     private void mainLoop() throws IOException {
         String server_res;
-        //ArrayList<String> articles = wiki.getRandomPages(5, NS.MAIN);
-        //articles.forEach(article -> System.out.println(WIKI_PREFIX + article.replace(' ', '_')));
         while(alive){
             while((server_res = serverManager.readline()) != null){
                 System.out.println("\t" + server_res);

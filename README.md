@@ -3,7 +3,7 @@
 WikiIRC-Bot is an IRC bot with MediaWiki API integrations.
 
 ## Running the bot
-The bot takes 3 commands: the address of a remote (or local for testing) host system, the port of the remote host's IRC 
+The bot takes 3 arguments: the address of a remote (or local for testing) host system, the port of the remote host's IRC 
 instance and then the initial channel to attempt to join.
 The format is `Bot <ip> <port> <channel>`.
 
@@ -40,6 +40,9 @@ Remember that the required file's name is `.env`, not `.env.example`.
 2. Rename `.env.example` to `.env` and change the values inside it to your Wikipedia credentials.
 3. In the project directory, execute `mvn package`. The `.jar` file will be built in the `./target` directory.
 4. Execute the `.jar` file using aforementioned arguments: `java -jar WikiIRC-Bot-1.0-SNAPSHOT-jar-with-dependencies 127.0.0.1 6667 help`
+
+**Please note that in order to make sure the bot picks up the `.env` file correctly, make sure that the shell's working 
+directory when executing the `.jar` file is root of the project (i.e. the same level as `.env`.**
 
 If you want to run without building manually, opening as a Maven project within any modern Java IDE and running 
 `dev.reecemercer.Bot` with the same argument set will also do the trick.
