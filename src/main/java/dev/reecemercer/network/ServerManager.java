@@ -102,7 +102,7 @@ public class ServerManager {
     }
 
     /**
-     * Asks the server to move the bot to another channel
+     * Asks the server to move the bot to another channel, leaving its current one in the process
      * @param newChannel The channel name to move to
      * @param oldChannel The channel that the bot is current a member of
      * @throws IOException Any errors thrown when writing to the server

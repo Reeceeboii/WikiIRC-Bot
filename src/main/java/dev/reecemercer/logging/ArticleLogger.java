@@ -1,13 +1,20 @@
 package dev.reecemercer.logging;
 
 import java.io.*;
-import java.util.ArrayList;
 
+/**
+ * Log generated Wikipedia page URLs into a file
+ */
 public class ArticleLogger {
     private File file;
     private BufferedWriter writer;
     private BufferedReader reader;
 
+    /**
+     * Create a new ArticleLogger instance
+     * @param name The name of the external file to log the generated URLs to
+     * @throws IOException Any errors thrown when opening a file handle to the logging file
+     */
     public ArticleLogger(String name) throws IOException {
         file = new File(name);
         // create the logging file if it doesn't exist already
