@@ -6,9 +6,8 @@ import java.io.*;
  * Log generated Wikipedia page URLs into a file
  */
 public class ArticleLogger {
-    private File file;
-    private BufferedWriter writer;
-    private BufferedReader reader;
+    private final File file;
+    private final BufferedWriter writer;
 
     /**
      * Create a new ArticleLogger instance
@@ -24,9 +23,8 @@ public class ArticleLogger {
             System.out.println("Bot created new file handle to existing logging file");
         }
 
-        // set up readers and writers
+        // set up a BufferedWriter in append mode so it can add to the end of the log file
         writer = new BufferedWriter(new FileWriter(file.getAbsoluteFile(), true));
-        reader = new BufferedReader(new FileReader(file.getAbsoluteFile()));
     }
 
     /**

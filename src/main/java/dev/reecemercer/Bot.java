@@ -19,14 +19,13 @@ import java.util.*;
  * Main bot driver class
  */
 public class Bot {
-    private ServerManager serverManager;
-    private HashMap<String, String> env;
+    private final ServerManager serverManager;
     private String nick;
     private static final String ALIAS = "!wb";
     private String channel;
     private static final String WIKI_PREFIX = "https://en.wikipedia.org/wiki/";
     ArticleLogger logger;
-    private Wiki wiki;
+    private final Wiki wiki;
     private boolean alive = true;
 
     /**
@@ -41,7 +40,7 @@ public class Bot {
         nick = "WikiBot";
 
         // load environment variables
-        env = loadEnv();
+        final HashMap<String, String> env = loadEnv();
 
         // create a new wiki instance
         wiki = new Wiki.Builder().build();
@@ -63,7 +62,7 @@ public class Bot {
 
      */
     private void mainLoop() throws IOException {
-        String server_res = null;
+        String server_res;
         //ArrayList<String> articles = wiki.getRandomPages(5, NS.MAIN);
         //articles.forEach(article -> System.out.println(WIKI_PREFIX + article.replace(' ', '_')));
         while(alive){
@@ -122,6 +121,7 @@ public class Bot {
                         } else if (cmd.get(1).equals("-name")){ // changing the name of the bot
                             if(cmd.get(2).length() > 0 && cmd.get(2).length() <= 9){
                                 serverManager.writeToChannel("Sure! Renaming myself to ".concat(cmd.get(2)), channel);
+                                nick = cmd.get(2);
                                 serverManager.rename(cmd.get(2));
                             }
                         } else {
@@ -180,9 +180,8 @@ public class Bot {
     /**
      * Load the bot's environment variables
      * @return A hashmap in the form <Variable name, variable value>
-     * @throws FileNotFoundException If there is no '.env' file to load
      */
-    private HashMap<String, String> loadEnv() throws FileNotFoundException {
+    private HashMap<String, String> loadEnv() {
         HashMap<String, String> envMap = new HashMap<>();
         try {
             final File envFile = new File(".env");
