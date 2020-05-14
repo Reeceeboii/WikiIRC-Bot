@@ -90,7 +90,7 @@ public class Bot {
                         } else if (cmd.get(1).equals("-q")) { // quitting the server
                             serverManager.quit("WikiBot says goodbye!");
                             System.out.println("Bot is exiting");
-                            // close the logger's file writing handle to make sure everything is writer
+                            // close the logger's file writing handle to make sure everything is written
                             logger.closeFileHandle();
                             alive = !alive;
                         } else {
